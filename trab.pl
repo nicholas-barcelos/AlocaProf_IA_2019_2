@@ -67,11 +67,10 @@ total_cabeca(El,ListaL, Total) :-
     conta_ocorr(L,1,Total).
 
 % Objetivo alocar todas as turmas
-objetivo(Estado) :- 
-    length(Estado, TamCam), 
+objetivo(Turma) :- 
     findall(T, turma(T, _), ListaTurma),
     length(ListaTurma, NTurmas),
-    TamCam = NTurmas.
+    Turma > NTurmas.
 
 % Verifica a disponibilidade de um professor ser alocado a uma turma
 cand(P,T,H) :-
@@ -92,11 +91,11 @@ valida(Prof,Turma,H,Estado) :-
 
 % Algoritmo de busca
 profundidade(Estado, Turma, Solucao):-
-    objetivo(Estado),
+    objetivo(Turma),
     reverse(Estado,Solucao).
 
 profundidade(Estado, Turma, Solucao):-
     cand(Prof,Turma,H),
     valida(Prof,Turma,H,Estado),
     NovaTurma is Turma+1,
-    profundidade([[Prof,Turma,H]|Estado], NovaTurma, Solucao).
+    profundidade([[Prof,Turma,H]|Estado], NovaTurma, Solucao),!.
