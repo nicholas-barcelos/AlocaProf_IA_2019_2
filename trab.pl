@@ -67,13 +67,13 @@ total_cabeca(El,ListaL, Total) :-
     conta_ocorr(L,1,Total).
 
 % Objetivo alocar todas as turmas
-objetivo(Turma) :- 
+objetivo(Turma):- 
     findall(T, turma(T, _), ListaTurma),
     length(ListaTurma, NTurmas),
     Turma > NTurmas.
 
 % Verifica a disponibilidade de um professor ser alocado a uma turma
-cand(P,T,H) :-
+cand(P,T,H):-
     professor(P),
     turma(T,H),
     disponivel(P,H).
@@ -90,6 +90,7 @@ valida(Prof,Turma,H,Estado) :-
     TurmasProf < 2.
 
 % Algoritmo de busca
+% Profundidade
 profundidade(Estado, Turma, Solucao):-
     objetivo(Turma),
     reverse(Estado,Solucao).
@@ -99,3 +100,47 @@ profundidade(Estado, Turma, Solucao):-
     valida(Prof,Turma,H,Estado),
     NovaTurma is Turma+1,
     profundidade([[Prof,Turma,H]|Estado], NovaTurma, Solucao),!.
+
+% Hill Climbing
+hillClimbing(Estado, Turma, Solucao):-
+    hillClCtrl(Estado,Turma,Solucao).
+
+hillClCtrl(Estado, Turma, Solucao):-
+    objetivo(Turma),
+    reverse(Estado,Solucao).
+
+hillClCtrl(Estado, Turma, Solucao):-
+    proxNoh(Estado,[Prof,Turma,Horario]),
+    NovaTurma is Turma+1,
+    hillClCtrl([[Prof,Turma,Horario]|Estado], NovaTurma, Solucao), !.
+
+proxNoh(Estado, [Prof,Turma,Horario]):-
+    findall(
+        [H,[Prof,Turma,Horario]],
+        (
+            eval(H, Estado, [Prof,Turma,Horario]),
+            not(member([Prof,_,Horario], Estado)),
+            not(member([_,Turma,Horario], Estado)),
+            not(member([Prof,Turma,Horario], Estado))
+        ), 
+        L
+    ),
+    menorElem(L,[_,[Prof,Turma,Horario]]).
+
+eval(H, Estado, [Prof,Turma,Horario]):-
+    professor(Prof),
+    turma(Turma,Horario),
+    disponivel(Prof,Horario),
+    total_cabeca(Prof, Estado, TurmasProf),
+    findall(T, turma(T, _), ListaTurma),
+    length(ListaTurma, NTurmas),
+    H is (NTurmas-Turma-1)*(TurmasProf+1).
+
+menorElem([[]],[[]]).
+menorElem([[C,No]],[C,No]).
+menorElem([[C1,No1],[C2,_]|L1],L2):-
+    C1 =< C2, !, %red cut
+    menorElem([[C1,No1]|L1],L2).
+
+menorElem([[_,_],[C2,No2]|L1],L2):-
+    menorElem([[C2,No2]|L1],L2).
