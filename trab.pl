@@ -134,7 +134,7 @@ eval(H, Estado, [Prof,Turma,Horario]):-
     total_cabeca(Prof, Estado, TurmasProf),
     findall(T, turma(T, _), ListaTurma),
     length(ListaTurma, NTurmas),
-    H is (NTurmas-Turma-1)*(TurmasProf+1).
+    H is (NTurmas-Turma+1)*(TurmasProf+1).
 
 menorElem([[]],[[]]).
 menorElem([[C,No]],[C,No]).
